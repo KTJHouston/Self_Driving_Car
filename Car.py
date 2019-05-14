@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union, Dict
 import pyglet as pg
 from pyglet.window import key
 from Vector2D import Vector2D
@@ -66,7 +66,7 @@ class Car:
             edges.append(e)
         return edges
 
-    def get_relative_corner(self, num):
+    def get_relative_corner(self, num: int) -> Vector2D:
         if num == 0:
             d = Vector2D(2, 2)
         elif num == 1:
@@ -79,7 +79,7 @@ class Car:
             raise IndexError
         return self.size / d
 
-    def get_verts(self):
+    def get_verts(self) -> Tuple[int, float]:
         relative = []
         # Rotate relative corners:
         for i in range(4):
@@ -94,17 +94,17 @@ class Car:
             output = output + new.tuple()
         return output
 
-    def move_forward(self, dist):
+    def move_forward(self, dist: Union[int, float]) -> None:
         forward = Vector2D(0, dist)
         rot = forward.rotate(self.dir)
         self.adj_pos(rot)
 
-    def set_color(self, color) -> None:
+    def set_color(self, color: (int, int, int)) -> None:
         self.color = ()
         for i in range(4):
             self.color += color
 
-    def update(self, dt, keys_pressed, last_keys, walls) -> None:
+    def update(self, dt: float, keys_pressed: Dict[int: bool], last_keys: Dict[int: bool], walls: List[Wall]) -> None:
         if self.is_dead:
             return
         if keys_pressed[key.W]:
