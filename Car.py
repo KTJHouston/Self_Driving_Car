@@ -3,6 +3,7 @@ import pyglet as pg
 from pyglet.window import key
 from Vector2D import Vector2D
 from Wall import Wall
+from Edge import Edge
 
 
 class Car:
@@ -30,16 +31,15 @@ class Car:
     def adj_pos(self, adj: Vector2D) -> None:
         self.pos = self.pos + adj
 
-    def adj_dir(self, dt: float, speed: Union[int, float]) -> None:
-        adj = dt * speed
+    def adj_dir(self, dt: float, turning_rate: Union[int, float]) -> None:
+        adj = dt * turning_rate
         self.dir = (self.dir + adj) % 360
 
     def collision(self, walls: List[Wall]) -> bool:
         edges = self.get_edges()
         for w in walls:
             for e in edges:
-                input = e + w.as_edge()
-                if Vector2D.is_collision(*input):
+                if Edge.is_collision(e, w.as_edge()):
                     return True
         return False
 
@@ -48,7 +48,7 @@ class Car:
                          ('v2f', self.get_verts()),
                          ('c3B', self.color))
 
-    def get_edges(self) -> List[Tuple[Vector2D, Vector2D]]:
+    def get_edges(self) -> List[Edge]:
         relative = []
         # Rotate relative corners:
         for i in range(4):
@@ -64,11 +64,18 @@ class Car:
         # Combine pairs of vertices for edges
         edges = []
         for i in range(4):
-            e = (verts[i], verts[(i+1) % 4])
+            e = Edge(verts[i], verts[(i+1) % 4])
             edges.append(e)
         return edges
 
     def get_relative_corner(self, num: int) -> Vector2D:
+        """
+        This SHOULD only need to be computed once, at initialization.
+        OR whenever size changes. These vertices aid in the computation
+        of the dynamic edges and verts.
+        :param num:
+        :return:
+        """
         if num == 0:
             d = Vector2D(2, 2)
         elif num == 1:
@@ -82,6 +89,11 @@ class Car:
         return self.size / d
 
     def get_verts(self) -> Tuple[int, float]:
+        """
+        Returns a tuple or ints or floats corresponding to
+        where each vertex of the Car should be drawn.
+        :return:
+        """
         relative = []
         # Rotate relative corners:
         for i in range(4):
