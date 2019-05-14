@@ -23,13 +23,15 @@ class Car:
         self.dir = dir % 360
         self.set_color(color)
         self.color = (0, 255, 0, 255, 255, 255, 255, 255, 255, 0, 255, 0)  # TODO Remove for color normal setting
-        self.speed = 4
+        self.speed = 200
+        self.turning_rate = 135
         self.is_dead = False
 
     def adj_pos(self, adj: Vector2D) -> None:
         self.pos = self.pos + adj
 
-    def adj_dir(self, adj: int) -> None:
+    def adj_dir(self, dt: float, speed: Union[int, float]) -> None:
+        adj = dt * speed
         self.dir = (self.dir + adj) % 360
 
     def collision(self, walls: List[Wall]) -> bool:
@@ -94,7 +96,8 @@ class Car:
             output = output + new.tuple()
         return output
 
-    def move_forward(self, dist: Union[int, float]) -> None:
+    def move_forward(self, dt: float, speed: Union[int, float]) -> None:
+        dist = dt * speed
         forward = Vector2D(0, dist)
         rot = forward.rotate(self.dir)
         self.adj_pos(rot)
@@ -104,17 +107,17 @@ class Car:
         for i in range(4):
             self.color += color
 
-    def update(self, dt: float, keys_pressed: Dict[int: bool], last_keys: Dict[int: bool], walls: List[Wall]) -> None:
+    def update(self, dt: float, keys_pressed: Dict[int, bool], last_keys: Dict[int, bool], walls: List[Wall]) -> None:
         if self.is_dead:
             return
         if keys_pressed[key.W]:
-            self.move_forward(self.speed)
+            self.move_forward(dt, self.speed)
         if keys_pressed[key.S]:
-            self.move_forward(-self.speed)
+            self.move_forward(dt, -self.speed)
         if keys_pressed[key.D]:
-            self.adj_dir(-3)
+            self.adj_dir(dt, -self.turning_rate)
         if keys_pressed[key.A]:
-            self.adj_dir(3)
+            self.adj_dir(dt, self.turning_rate)
         if self.collision(walls):
             self.set_color((221, 22, 22))
             self.is_dead = True
