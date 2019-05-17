@@ -38,6 +38,7 @@ class Wall:
             return self.e.b + perp
 
     def get_verts(self) -> Tuple[int]:
+        # TODO call only once at the beginning
         output = ()
         for i in range(4):
             output = output + self.get_corner(i).tuple()

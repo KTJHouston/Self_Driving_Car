@@ -14,7 +14,7 @@ class Vector2D:
     def __copy__(self) -> Vector2D:
         return Vector2D(self.x, self.y)
 
-    def dot(self, other: Vector2D) -> Vector2D:
+    def dot(self, other: Vector2D) -> Union[int, float]:
         m = self * other
         return m.x + m.y
 
@@ -31,6 +31,10 @@ class Vector2D:
         :param ox: Sets the value of the x component of the Vector2D which will be returned. Default 1.
         :return: A Vector2D which is perpendicular, containing the x value given.
         """
+        if self.x == 0:
+            return Vector2D(self.y, 0)
+        elif self.y == 0:
+            return Vector2D(0, self.x)
         oy = (-1 * self.x * ox) / self.y
         return Vector2D(ox, oy)
 
@@ -125,14 +129,3 @@ class Vector2D:
 
         return 0 <= r <= 1 and 0 <= s <= 1
 
-
-'''
-a = Vector2D(3, 4)
-b = Vector2D(-2, 1)
-a = a.set_dist(10)
-c = b.copy()
-b[0] = 15
-print("a: ", a)
-print("b: ", b)
-print("c: ", c)
-'''
