@@ -23,7 +23,6 @@ class Car:
             self.rel_corners.append(self.get_relative_corner(i))
         self.dir = dir % 360
         self.set_color(color)
-        self.color = (0, 255, 0, 255, 255, 255, 255, 255, 255, 0, 255, 0)  # TODO Remove for color normal setting
         self.speed = 200
         self.turning_rate = 135
         self.is_dead = False
@@ -133,6 +132,4 @@ class Car:
         if self.collision(walls):
             self.set_color((221, 22, 22))
             self.is_dead = True
-        else:
-            self.color = (0, 255, 0, 255, 255, 255, 255, 255, 255, 0, 255, 0)
 

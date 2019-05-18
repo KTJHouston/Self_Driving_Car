@@ -66,6 +66,9 @@ class Driver:
             out.append(shortest)
         return out
 
+    def set_car(self, car: Car) -> None:
+        self.car = car
+
     def update(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall]) -> None:
         vision = self.find_state(walls)
         # TODO pass state to NN to find actions
