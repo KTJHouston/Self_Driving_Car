@@ -119,7 +119,7 @@ class Car:
         for i in range(4):
             self.color += color
 
-    def update(self, dt: float, keys_pressed: Dict[int, bool], last_keys: Dict[int, bool], walls: List[Wall]) -> None:
+    def update(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall]) -> None:
         if self.is_dead:
             return
         if keys_pressed[key.W]:
