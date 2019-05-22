@@ -47,7 +47,7 @@ class Wall:
         return output
 
     def __str__(self) -> str:
-        return "Wall(" + str(self.a) + ", " + str(self.e.b) + ")"
+        return "Wall(" + str(self.e.a) + ", " + str(self.e.b) + ")"
 
     def update(self, dt: float) -> None:
         pass

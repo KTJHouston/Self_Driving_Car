@@ -2,6 +2,7 @@ from typing import List, Dict
 import pyglet as pg
 from Car import Car
 from Wall import Wall
+from RewardGate import RewardGate
 from Edge import Edge
 
 
@@ -13,6 +14,16 @@ class Driver:
         self.show_vision = show_vision
         self.vision = []  # List[Edge]
         self.collisions = []  # List[Vector2D]
+
+    def check_rewards(self, rgs: List[RewardGate]) -> int:
+        edges = self.car.get_edges()
+        for i in range(len(rgs)):
+            for e in edges:
+                if Edge.is_collision(e, rgs[i].as_edge()):
+                    reward = RewardGate.trigger(i, rgs)
+                    if reward > 0:
+                        return reward
+        return 0
 
     def draw(self) -> None:
         self.car.draw()
@@ -69,8 +80,9 @@ class Driver:
     def set_car(self, car: Car) -> None:
         self.car = car
 
-    def update(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall]) -> None:
+    def update(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall], rgs: List[RewardGate]) -> None:
         vision = self.find_state(walls)
         # TODO pass state to NN to find actions
         # TODO pass actions to car
         self.car.update(dt, keys_pressed, walls)
+        self.check_rewards(rgs)
