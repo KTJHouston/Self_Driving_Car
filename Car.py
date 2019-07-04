@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List, Tuple, Union, Dict
 import pyglet as pg
 from pyglet.window import key
@@ -22,6 +23,7 @@ class Car:
         for i in range(4):
             self.rel_corners.append(self.get_relative_corner(i))
         self.dir = dir % 360
+        self.color = ()
         self.set_color(color)
         self.speed = 200
         self.turning_rate = 135
@@ -41,6 +43,12 @@ class Car:
                 if Edge.is_collision(e, w.as_edge()):
                     return True
         return False
+
+    def __copy__(self) -> Car:
+        color = self.color[0:3]
+        c = Car(self.size.copy(), color, self.pos.copy(), self.dir)
+        c.is_dead = self.is_dead
+        return c
 
     def draw(self) -> None:
         pg.graphics.draw(4, pg.gl.GL_QUADS,
@@ -118,7 +126,18 @@ class Car:
         for i in range(4):
             self.color += color
 
-    def update(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall]) -> None:
+    def update_nn(self, dt: float, gas: float, wheel: float, walls: List[Wall]) -> bool:
+        if self.is_dead:
+            return True
+        self.move_forward(dt, gas)
+        self.adj_dir(dt, -wheel)
+        if self.collision(walls):
+            self.set_color((221, 22, 22))
+            self.is_dead = True
+            return True
+        return False
+
+    def update_keys(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall]) -> None:
         if self.is_dead:
             return
         if keys_pressed[key.W]:

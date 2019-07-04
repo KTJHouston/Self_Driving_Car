@@ -74,12 +74,13 @@ class RewardGate:
 
     @staticmethod
     def trigger(index: int, gates: List[RewardGate]) -> int:
+        space = 5
         if gates[index].is_on:
             gates[index].flip(False)
-            to_turn_on = (index - 2) % len(gates)
+            to_turn_on = (index - space) % len(gates)
             gates[to_turn_on].flip(True)
             return 1
         else:
-            to_turn_on = (index - 2) % len(gates)
+            to_turn_on = (index - space) % len(gates)
             gates[to_turn_on].flip(True)
         return 0

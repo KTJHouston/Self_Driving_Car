@@ -8,7 +8,7 @@ from collections import deque
 class Mind:
 
     def __init__(self, discount_rate: float = .95, learning_rate: float = .001, memory_size: int = 1000):
-        self.epsilon = 1.0
+        self.epsilon = .75
         self.discount_rate = discount_rate
         self.adam = keras.optimizers.Adam(learning_rate)
         self.model = None
@@ -62,22 +62,30 @@ class Mind:
                 if i < len(self.reward_mem) - 1:  # If not last element:
                     if self.reward_mem[i] < 0:  # If end of a sequence (crash):
                         break
-                    self.reward_mem[i] = self.reward_mem[i] + int(self.discount_rate * self.reward_mem[i + 1])
+                    self.reward_mem[i] = self.reward_mem[i] + self.discount_rate * self.reward_mem[i + 1]
+                    if -1 < self.reward_mem[i] < 1:  # If sufficiently small
+                        break
                 if is_punishment:
                     # negate action values:
                     self.action_mem[i] = -1. * self.action_mem[i]
 
     def train(self):
+        print("Training...", end=' ')
         self.timer = 0
 
         # Aliases:
         s = self.state_mem
         a = self.action_mem
         r = self.reward_mem
-        for i in range(len(s)):
+        for i in reversed(range(len(s))):
             if r[i] != 0:
-                abs_r = abs(r[i])
+                abs_r = abs(int(r[i]))
                 self.model.fit(s[i], a[i], epochs=abs_r, verbose=0)
+            else:
+                del s[i]
+                del a[i]
+                del r[i]
+        print("Done!")
 
 
 # m = Mind()

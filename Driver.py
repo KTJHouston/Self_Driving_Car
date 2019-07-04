@@ -1,6 +1,7 @@
 from typing import List, Dict
 import pyglet as pg
 from Car import Car
+from Mind import Mind
 from Wall import Wall
 from RewardGate import RewardGate
 from Edge import Edge
@@ -9,11 +10,14 @@ from Edge import Edge
 class Driver:
 
     def __init__(self, car: Car, show_vision: bool = False):
-        # TODO pass driver a neural net controller
         self.car = car
+        self.original_car = car.__copy__()
+        self.mind = Mind()
         self.show_vision = show_vision
         self.vision = []  # List[Edge]
         self.collisions = []  # List[Vector2D]
+        self.counter = 0
+        self.buffer = 5
 
     def check_rewards(self, rgs: List[RewardGate]) -> int:
         edges = self.car.get_edges()
@@ -80,9 +84,31 @@ class Driver:
     def set_car(self, car: Car) -> None:
         self.car = car
 
-    def update(self, dt: float, keys_pressed: Dict[int, bool], walls: List[Wall], rgs: List[RewardGate]) -> None:
+    def update(self, dt: float, walls: List[Wall], rgs: List[RewardGate]) -> bool:
+        if self.buffer > 0:
+            self.buffer -= 1
+            return False
+        self.counter += 1
         vision = self.find_state(walls)
-        # TODO pass state to NN to find actions
-        # TODO pass actions to car
-        self.car.update(dt, keys_pressed, walls)
-        self.check_rewards(rgs)
+        gas, wheel = self.mind.act(vision)
+        gas *= 200
+        wheel *= 150
+        done = self.car.update_nn(dt, gas, wheel, walls)
+        r = 0
+        if done:
+            r += -5
+        r += self.check_rewards(rgs) * 20
+        self.mind.reward(r)
+        if done:
+            self.mind.train()
+            if self.mind.epsilon > .05:
+                self.mind.epsilon = self.mind.epsilon * .95
+            else:
+                self.mind.epsilon = .05
+            self.set_car(self.original_car.__copy__())
+            print("Counter: {} Eps: {}".format(self.counter, self.mind.epsilon))
+            print("Rewards: ", self.mind.reward_mem)
+            self.counter = 0
+            self.buffer = 5
+            return True
+        return False
